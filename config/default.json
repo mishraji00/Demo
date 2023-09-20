@@ -1,0 +1,8 @@
+{
+    "logConfig": {
+        "logFolder": ".//logs//",
+        "logFile": "AppName-%DATE%.log",
+        "logLevel" : "debug"
+    }
+    
+}
