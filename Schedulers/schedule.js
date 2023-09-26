@@ -16,6 +16,7 @@ function scheduleDataInsertion() {
             await fetchDataAndStore(apiData);
         } catch (error) {
             console.error('Error:', error);
+            console.error(`Error scheduling the job`)
         }
     });
 }

@@ -1,5 +1,6 @@
 
 require('dotenv').config();
+const {log} =require('../config/loggerFile')
 
 const db = require('../config/db');
 
@@ -23,12 +24,15 @@ async function fetchDataAndStore(apiData) {
                 // Execute the insert query using the active connection
                 await connection.execute(insertQuery, [recordId, user.email, user.first_name, user.last_name, user.avatar]);
                 console.log(`Record for id ${recordId} inserted into the database.`);
-
+                log.info(`Record for id ${recordId} inserted into the database.`)
                 currentIndex++;
 
                 
-            } catch (error) {
+            }
+            
+            catch (error) {
                 console.error(`Error inserting record for id ${recordId} into the database:`, error);
+                log.error(`Error inserting record for id ${recordId} into the database:`)
             }
         }
        
