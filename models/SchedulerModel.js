@@ -2,7 +2,6 @@
 require('dotenv').config();
 
 const db = require('../config/db');
-const {scheduleDataInsertion} = require('../Schedulers/schedule')
 
 let currentIndex = 0; // Flag to track if records have been fetched
 
