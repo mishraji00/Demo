@@ -1,6 +1,7 @@
 const {redisClient} = require('../config/redis');
 const {log} = require("../config/loggerFile")
 
+
 async function storeJwtInRedis(email,token) {
   try{
     const key = `jwt:${email}`;

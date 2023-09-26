@@ -1,12 +1,15 @@
 const axios = require('axios');
 const mysql = require('mysql2');
+// const schedule = require('node-schedule');
+
+
 require("dotenv").config();
 
 const connection = mysql.createConnection({
-    host    : process.env.MYSQL_HOST,
-    user      : process.env.MYSQL_USER,
-    password  : process.env.MYSQL_PASSWORD,
-    database  : process.env.MYSQL_DATABASE
+    host     :  "localhost",
+    user      : "root",
+    password  : "root123",
+    database  : "student"
 });
 
 connection.connect((error) => {
@@ -18,40 +21,40 @@ connection.connect((error) => {
 });
 
 async function fetchDataAndStore() {
-  try {
-    const response = await axios.get('https://reqres.in/api/users/2');
-    const apiData = response.data.data;
-
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255),
-        first_name VARCHAR(255),
-        last_name VARCHAR(255),
-        avatar VARCHAR(255)
-      )
-    `;
-    connection.query(createTableQuery);
-
-    const insertQuery = `
-  INSERT INTO users (id, email, first_name, last_name, avatar)
-  VALUES (?, ?, ?, ?, ?)
-`;
-
-const values = [apiData.id, apiData.email, apiData.first_name, apiData.last_name, apiData.avatar];
-
-connection.query(insertQuery, values, (error, results) => {
-  if (error) {
-    console.error('Error inserting data:', error);
-  } else {
-    console.log('Data successfully inserted:', results);
+    try {
+      // Make API request
+      const response = await axios.get('https://reqres.in/api/users?page=2');
+      const apiData = response.data.data;
+  
+      // Create a table if it doesn't exist
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS users (
+          id INT PRIMARY KEY,
+          email VARCHAR(255),
+          first_name VARCHAR(255),
+          last_name VARCHAR(255),
+          avatar VARCHAR(255)
+        )
+      `;
+      connection.query(createTableQuery);
+  
+      // Store data in the MySQL database
+      for (const user of apiData) {
+        const insertQuery = `
+          INSERT INTO users (id, email, first_name, last_name, avatar)
+          VALUES (${user.id}, '${user.email}', '${user.first_name}', '${user.last_name}', '${user.avatar}')
+        `;
+        connection.query(insertQuery);
+      }
+  
+      console.log('Data successfully stored in the database.');
+    } catch (error) {
+      console.error('Error fetching data from API or storing in the database:', error);
+    } 
   }
-});
-  } catch (error) {
-    console.error('Error fetching data from API or storing in the database:', error);
-  } finally {
-    connection.end();
-  }
-}
+//   const job = schedule.scheduleJob('0 * * * *', () => {
+//     console.log('Fetching data and storing in the database...');
+//     fetchDataAndStore();
+// });  
 
-fetchDataAndStore();
+

@@ -1,18 +1,19 @@
 const db = require('../config/db');
 const {log} =require('../config/loggerFile')
 
+
 async function getAllUsers() {
-    const sqlQueryGetAll = `Select id,first_name,last_name,gender,email,number from registration`;
-    try {
-    const rows = await db.query(sqlQueryGetAll);
-    log.info(`Sql Query: ${sqlQueryGetAll}`);
+  const sqlQueryGetAll = `Select id,first_name,last_name,gender,email,number from registration`;
+  try {
+  const rows = await db.query(sqlQueryGetAll);
+  log.info(`Sql Query: ${sqlQueryGetAll}`);
 
-    return rows[0];
+  return rows[0];
 
-  } catch (error) {
-    log.error(`Sql Query: ${sqlQueryGetAll}`);
-    throw error;
-  }
+} catch (error) {
+  log.error(`Sql Query: ${sqlQueryGetAll}`);
+  throw error;
+}
 }
 
 async function getUserById(id) {
@@ -95,6 +96,6 @@ module.exports = {
   insertUser,
   updateUser,
   deleteUser,
-  getUserByEmail
+  getUserByEmail,
   
 };

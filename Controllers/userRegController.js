@@ -5,11 +5,35 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const key =process.env.key;
 const redis =require('../Controllers/RedisController');
+const db = require('../config/db');
+
 
 async function getUsers(req, res) {
   try {
-    const data = await UserModel.getAllUsers();
-    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Fetch user data for the requested page
+    const dataRows = await db.query(`
+      SELECT id, first_name, last_name, gender, email, number
+      FROM registration
+      LIMIT ${limit} OFFSET ${offset};
+    `);
+
+    // Fetch the total count of users
+    const countRow = await db.query('SELECT COUNT(*) AS totalUsers FROM registration;');
+
+    const data = dataRows[0];
+    const totalUsers = countRow[0][0].totalUsers;
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const paginationInfo = {
+      totalUsers,
+      totalPages,
+      currentPage: page,
+      pageSize: limit,
+    };
 
     log.info({
       method: req.method,
@@ -17,11 +41,11 @@ async function getUsers(req, res) {
       statusCode: res.statusCode,
       message: 'Successfully fetched the users',
       requestBody: req.body,
-      responseBody: data, // Include the response body in the log
+      responseBody: { data, pagination: paginationInfo },
     });
 
     if (data) {
-      res.status(200).json(data);
+      res.status(200).json({ data, pagination: paginationInfo });
     } else {
       res.status(404).json({ error: 'User not found' });
     }
@@ -38,6 +62,8 @@ async function getUsers(req, res) {
     res.status(500).json({ error: 'Could not fetch User', details: error.message });
   }
 }
+
+
 
 async function getUserById(req, res) {
   const id = req.params.id;
@@ -89,7 +115,7 @@ async function getUserById(req, res) {
 async function insertUser(req, res) {
   
   const data = req.body;
-  data.password = bcrypt.hash(data.password,10);
+  data.password = bcrypt.hashsyn(data.password,10);
 
   try {
     const result = await UserModel.insertUser(data);
